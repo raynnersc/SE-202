@@ -1,0 +1,4 @@
+[toolchain]
+channel = "nightly"
+components = ["cargo", "llvm-tools", "rust-analyzer", "clippy", "rust-std"]
+targets = ["thumbv7em-none-eabihf"]

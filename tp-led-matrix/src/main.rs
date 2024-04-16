@@ -20,9 +20,9 @@ use panic_probe as _;
 use tp_led_matrix::{Color, Image, Matrix};
 use futures::FutureExt;
 
-static IMAGE: Mutex<ThreadModeRawMutex, Image> = Mutex::new(Image::new_solid(Color::GREEN));
-static NEXT_IMAGE: Signal<ThreadModeRawMutex, Box<POOL>> = Signal::new();
-box_pool!(POOL: Image);
+static IMAGE: Mutex<ThreadModeRawMutex, Image> = Mutex::new(Image::new_solid(Color::BLUE));
+// static NEXT_IMAGE: Signal<ThreadModeRawMutex, Box<POOL>> = Signal::new();
+// box_pool!(POOL: Image);
 
 #[embassy_executor::main]
 async fn main(spawner: Spawner) {
@@ -47,13 +47,13 @@ async fn main(spawner: Spawner) {
     )
     .await;
 
-    unsafe {
-        const BLOCK: BoxBlock<Image> = BoxBlock::new();
-        static mut MEMORY: [BoxBlock<Image>; 3] = [BLOCK; 3];
-        for block in &mut MEMORY {
-          POOL.manage(block);
-        }
-    }
+    // unsafe {
+    //     const BLOCK: BoxBlock<Image> = BoxBlock::new();
+    //     static mut MEMORY: [BoxBlock<Image>; 3] = [BLOCK; 3];
+    //     for block in &mut MEMORY {
+    //       POOL.manage(block);
+    //     }
+    // }
 
     // spawner.spawn(change_image()).unwrap();
     spawner.spawn(serial_receiver(p.USART1, p.PB6, p.PB7, p.DMA1_CH5)).unwrap();
@@ -79,13 +79,15 @@ async fn blinker(pb14: PB14) {
 async fn display(mut matrix: Matrix<'static>) {
     let mut ticker = Ticker::every(Duration::from_hz(640));
     loop {
-        let mut image = NEXT_IMAGE.wait().now_or_never();
-        if image.is_none() {
-            image = NEXT_IMAGE.await;
-        }
+        // let mut image = NEXT_IMAGE.wait().now_or_never();
+        // if image.is_none() {
+        //     image = NEXT_IMAGE.await;
+        // }
+        let image = IMAGE.lock().await;
         matrix.display_image(&image, &mut ticker).await;
+        drop(image);
         ticker.next().await;
-        row = (row + 1) % 8;
+        // row = (row + 1) % 8;
     }
 }
 

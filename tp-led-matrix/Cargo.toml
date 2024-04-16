@@ -23,7 +23,7 @@ embassy-stm32 = { version = "0.1.0", features = ["stm32l475vg", "time-driver-any
 embassy-sync = "0.5.0"
 embassy-time = { version = "0.3.0", features = ["tick-hz-32_768"] }
 embedded-hal = "1.0.0"
-futures = { version = "0.3.30", default-features = false }
+futures = { version = "0.3.30", default-features = false }
 heapless = "0.8.0"
 micromath = "2.1.0"
 panic-probe = { version = "0.3.1", features = ["print-defmt"] }

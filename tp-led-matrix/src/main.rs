@@ -64,11 +64,9 @@ async fn main(spawner: Spawner) {
     spawner.spawn(blinker(p.PB14)).unwrap();
     spawner.spawn(display(matrix)).unwrap();
 
-    let Ok(initial_image) = POOL.alloc(Image::gradient(Color::BLUE)) else {
-        defmt::error!("Failed to allocate initial image");
-        loop {}
-    };
-    NEXT_IMAGE.signal(initial_image);
+    if let Ok(initial_image) = POOL.alloc(Image::gradient(Color::BLUE)) {
+        NEXT_IMAGE.signal(initial_image);
+    }
 
     /*
     loop {
@@ -126,7 +124,7 @@ async fn change_image() {
         let color = color_cycle.next().unwrap();
         let Ok(image) = POOL.alloc(Image::gradient(*color)) else {
             defmt::error!("Failed to allocate initial image");
-            loop {}
+            continue;
         };
         NEXT_IMAGE.signal(image);
         ticker.next().await;
@@ -141,7 +139,7 @@ async fn serial_receiver(usart1: USART1, pb6: PB6, pb7: PB7, dma1_ch5: DMA1_CH5)
     // let mut buffer = [0 as u8; 192];
 
     loop {
-        let mut character = [0 as u8; 1];
+        let mut character = [0_u8; 1];
         serial.read(&mut character).await.unwrap();
         if character[0] != 0xff {
             continue;
